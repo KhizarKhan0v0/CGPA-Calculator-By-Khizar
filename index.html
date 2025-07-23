@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CGPA Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .subject {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 8px;
+      width: 100%;
+    }
+    button {
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #results {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>CGPA Calculator</h2>
+    <label>Previous CGPA: <input type="number" id="prevCgpa" step="0.01" value="3.59" /></label><br>
+    <label>Previous Credit Hours: <input type="number" id="prevCredits" value="92" /></label><br>
+    <label>Number of Subjects: <input type="number" id="numSubjects" value="5" /></label><br>
+    <button onclick="generateSubjects()">Enter Subject Details</button>
+    <div id="subjectInputs"></div>
+    <button onclick="calculateCGPA()">Calculate Updated CGPA</button>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const gradeMap = [
+      { min: 85, max: 100, point: 4.00 },
+      { min: 80, max: 84, point: 3.67 },
+      { min: 75, max: 79, point: 3.34 },
+      { min: 71, max: 74, point: 3.01 },
+      { min: 68, max: 70, point: 2.67 },
+      { min: 64, max: 67, point: 2.34 },
+      { min: 61, max: 63, point: 2.01 },
+      { min: 58, max: 60, point: 1.67 },
+      { min: 54, max: 57, point: 1.31 },
+      { min: 50, max: 53, point: 1.00 },
+      { min: 0,  max: 49, point: 0.00 },
+    ];
+
+    function generateSubjects() {
+      const num = parseInt(document.getElementById('numSubjects').value);
+      const container = document.getElementById('subjectInputs');
+      container.innerHTML = '';
+      for (let i = 0; i < num; i++) {
+        container.innerHTML += `
+          <div class="subject">
+            <input type="number" placeholder="Marks for Subject ${i + 1}" class="marks" />
+            <input type="number" placeholder="Credit Hours for Subject ${i + 1}" class="credits" value="3" />
+          </div>`;
+      }
+    }
+
+    function getGradePoint(marks) {
+      for (const range of gradeMap) {
+        if (marks >= range.min && marks <= range.max) {
+          return range.point;
+        }
+      }
+      return 0;
+    }
+
+    function calculateCGPA() {
+      const prevCgpa = parseFloat(document.getElementById('prevCgpa').value);
+      const prevCredits = parseFloat(document.getElementById('prevCredits').value);
+      const marks = Array.from(document.getElementsByClassName('marks')).map(el => parseFloat(el.value));
+      const credits = Array.from(document.getElementsByClassName('credits')).map(el => parseFloat(el.value));
+
+      let totalGradePoints = 0;
+      let currentCredits = 0;
+
+      for (let i = 0; i < marks.length; i++) {
+        const gradePoint = getGradePoint(marks[i]);
+        totalGradePoints += gradePoint * credits[i];
+        currentCredits += credits[i];
+      }
+
+      const totalPreviousPoints = prevCgpa * prevCredits;
+      const newCGPA = ((totalPreviousPoints + totalGradePoints) / (prevCredits + currentCredits)).toFixed(2);
+
+      document.getElementById('results').innerText = `Updated CGPA: ${newCGPA}`;
+    }
+  </script>
+</body>
+</html>
